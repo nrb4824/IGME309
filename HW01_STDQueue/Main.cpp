@@ -1,4 +1,5 @@
 #include "Main.h"
+#include "Queue.h"
 template <typename T> 
 void Print(std::deque<T> a_queue)
 {
