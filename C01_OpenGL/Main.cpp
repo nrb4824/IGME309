@@ -1,4 +1,5 @@
 #include "Main.h"
+//window/Frame ->Render Content/ paper -> shaders -> Draw -> main loop/Game logic
 //Callbacks
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -50,6 +51,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 //int main(void)
 {
 	//Window Initialization ---------------------------------------------------------------------
+	//a way to name parts of the code (pragma)
 #pragma region Window Initialization
 	if (AllocConsole())
 	{
@@ -116,6 +118,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	ShowWindow(m_hWindowHandler, nCmdShow); //Show the window
 	UpdateWindow(m_hWindowHandler); //Update the window
+//Way to end the pragma region
 #pragma endregion
 	//OpenGL Initialization ---------------------------------------------------------------------
 #pragma region OpenGL Initialization
