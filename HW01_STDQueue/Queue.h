@@ -26,7 +26,7 @@ public:
 	{
 		size = other.size;
 		capacity = other.capacity;
-		Queue = new T[capacity];
+		queue = new T[capacity];
 		std::copy(other.queue, other.queue + other.size, queue);
 	}
 
@@ -77,56 +77,33 @@ public:
 			capacity = capacity * 2;
 
 		}
-		//if its an int,double or float use basic comparsion (<,>,=)
-		if (typeid(T).name() == int || typeid(T).name() == float || typeid(T).name() == double)
+
+		queue[size] = temp;
+		size++;
+		Sort();
+	}
+
+	void Sort()
+	{
+		for (int i = 0; i < size - 1; i++)
 		{
-			for (int i = 0; i <= size - 1; i++)
+			for (int j = 0; j < size - i - 1; j++)
 			{
-				if (Queue[i] > temp)
+				if (queue[j] > queue[j + 1])
 				{
-					Shift(i);
-					Queue[i] = temp;
-					size++;
-					break;
-				}	
-			}
-		}
-		//if its a string, sort based on length.
-		else if (typeid(T).name() == std::string)
-		{
-			int len = strlen(temp);
-			for (int i = 0; i <= size - 1; i++)
-			{
-				if (strlen(Queue[i]) > len)
-				{
-					Shift(i);
-					Queue[i] = temp;
-					size++;
-					break;
-				}
-			}
-		}
-		//Custom classes
-		else
-		{
-			for (int i = 0; i <= size - 1; i++)
-			{
-				if (Queue[i].operator>(temp))
-				{
-					Shift(i);
-					Queue[i] = temp;
-					size++;
-					break;
+					T t = queue[j];
+					queue[j] = queue[j + 1];
+					queue[j + 1] = t;
 				}
 			}
 		}
 	}
-	
+
 	void Shift(int index)
 	{
-		for (int t = size-1; t >= index; t--)
+		for (int t = size - 1; t >= index; t--)
 		{
-			Queue[t + 1] = Queue[t];
+			queue[t + 1] = queue[t];
 		}
 	}
 	/// <summary>
