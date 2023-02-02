@@ -67,7 +67,7 @@ void AppClass::InitOpenGL(void)
 }
 void AppClass::InitShaders(void)
 {
-	m_uShaderProgramID = LoadShaders("Shaders//BasicColor.vs", "Shaders//BasicColorInvert.fs");
+	m_uShaderProgramID = LoadShaders("Shaders//BasicColor.vs", "Shaders//BasicColorE03.fs");
 	glUseProgram(m_uShaderProgramID);
 }
 void AppClass::InitVariables(void)
