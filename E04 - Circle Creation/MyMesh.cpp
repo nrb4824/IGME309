@@ -15,8 +15,8 @@ void MyMesh::GenerateCircle(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	std::vector<vector3> vertexes;
 	GLfloat angle = 0;
 	GLfloat numTriangles = static_cast<GLfloat>(a_nSubdivisions);
-	GLfloat circumfrence = static_cast<GLfloat>(2.0f * PI);
-	GLfloat angleAdvance = circumfrence / numTriangles;					//circumfrence = PI * diameter using this can find delta (the angle) for each triangle
+	GLfloat circumfrence = static_cast<GLfloat>(2.0f * PI); //essentially just 360 degrees
+	GLfloat angleAdvance = circumfrence / numTriangles;	//circumfrence = PI * diameter using this can find delta (the angle) for each triangle
 
 	for (int i = 0; i < a_nSubdivisions; i++)
 	{
@@ -29,6 +29,13 @@ void MyMesh::GenerateCircle(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	{
 		AddTri(ZERO_V3, vertexes[i], vertexes[(i + 1) % a_nSubdivisions]);
 	}
+
+	//code for a cone
+	//for (int i = 0; i < a_nSubdivisions; i++)
+	//{
+	//	AddTri(vector3(0,0,1.0f), vertexes[i], vertexes[(i + 1) % a_nSubdivisions]);
+	//	AddTri(ZERO_V3, vertexes[(i + 1) % a_nSubdivisions], vertexes[i]);
+	//}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
