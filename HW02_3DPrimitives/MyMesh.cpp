@@ -60,10 +60,23 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	std::vector<vector3> vertexes;
+	GLfloat angle = 0;
+	GLfloat numTriangles = static_cast<GLfloat>(a_nSubdivisions);
+	GLfloat circumfrence = static_cast<GLfloat>(2.0f * PI); //essentially just 360 degrees
+	GLfloat angleAdvance = circumfrence / numTriangles;	//circumfrence = PI * diameter using this can find delta (the angle) for each triangle
 
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		vertexes.push_back(vector3(cos(angle) * a_fRadius, sin(angle) * a_fRadius, 0.0f));
+		angle += angleAdvance;
+	}
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		AddTri(vector3(0,0,a_fHeight), vertexes[i], vertexes[(i + 1) % a_nSubdivisions]);
+		AddTri(ZERO_V3, vertexes[(i + 1) % a_nSubdivisions], vertexes[i]);
+	}
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
@@ -84,9 +97,25 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	std::vector<vector3> vertexes;
+	std::vector<vector3> vertexes2;
+	GLfloat angle = 0;
+	GLfloat numTriangles = static_cast<GLfloat>(a_nSubdivisions);
+	GLfloat circumfrence = static_cast<GLfloat>(2.0f * PI); //essentially just 360 degrees
+	GLfloat angleAdvance = circumfrence / numTriangles;	//circumfrence = PI * diameter using this can find delta (the angle) for each triangle
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		vertexes.push_back(vector3(cos(angle) * a_fRadius, sin(angle) * a_fRadius, 0.0f));
+		vertexes2.push_back(vector3(cos(angle) * a_fRadius, sin(angle) * a_fRadius, a_fHeight));
+		angle += angleAdvance;
+	}
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		AddTri(ZERO_V3, vertexes[(i + 1) % a_nSubdivisions], vertexes[i]);
+		AddTri(vector3(0, 0, a_fHeight), vertexes2[i], vertexes2[(i + 1) % a_nSubdivisions]);
+		AddQuad(vertexes[(i + 1) % a_nSubdivisions], vertexes2[(i + 1) % a_nSubdivisions], vertexes[i], vertexes2[i]);
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -114,9 +143,30 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	std::vector<vector3> vertexesIn1;
+	std::vector<vector3> vertexesIn2;
+	std::vector<vector3> vertexesOut1;
+	std::vector<vector3> vertexesOut2;
+	GLfloat angle = 0;
+	GLfloat numTriangles = static_cast<GLfloat>(a_nSubdivisions);
+	GLfloat circumfrence = static_cast<GLfloat>(2.0f * PI); //essentially just 360 degrees
+	GLfloat angleAdvance = circumfrence / numTriangles;	//circumfrence = PI * diameter using this can find delta (the angle) for each triangle
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		vertexesIn1.push_back(vector3(cos(angle) * a_fInnerRadius, sin(angle) * a_fInnerRadius, 0.0f));
+		vertexesIn2.push_back(vector3(cos(angle) * a_fInnerRadius, sin(angle) * a_fInnerRadius, a_fHeight));
+		vertexesOut1.push_back(vector3(cos(angle) * a_fOuterRadius, sin(angle) * a_fOuterRadius, 0.0f));
+		vertexesOut2.push_back(vector3(cos(angle) * a_fOuterRadius, sin(angle) * a_fOuterRadius, a_fHeight));
+		angle += angleAdvance;
+	}
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		AddQuad(vertexesIn1[i], vertexesIn2[i], vertexesIn1[(i + 1) % a_nSubdivisions], vertexesIn2[(i + 1) % a_nSubdivisions]);
+		AddQuad(vertexesOut1[(i + 1) % a_nSubdivisions], vertexesOut2[(i + 1) % a_nSubdivisions], vertexesOut1[i], vertexesOut2[i]);
+		AddQuad(vertexesIn1[(i + 1) % a_nSubdivisions], vertexesOut1[(i + 1) % a_nSubdivisions], vertexesIn1[i], vertexesOut1[i]);
+		AddQuad( vertexesIn2[i], vertexesOut2[i], vertexesIn2[(i + 1) % a_nSubdivisions], vertexesOut2[(i + 1) % a_nSubdivisions]);
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -146,10 +196,36 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	std::vector<vector3> vertexesIn1;
+	std::vector<vector3> vertexesIn2;
+	std::vector<vector3> vertexesOut1;
+	std::vector<vector3> vertexesOut2;
+	GLfloat angle = 0;
+	GLfloat angle2 = 0;
+	GLfloat numTriangles = static_cast<GLfloat>(a_nSubdivisionsA);
+	GLfloat circumfrence = static_cast<GLfloat>(2.0f * PI); //essentially just 360 degrees
+	GLfloat angleAdvance = circumfrence / numTriangles;	//circumfrence = PI * diameter using this can find delta (the angle) for each triangle
+	GLfloat angleAdvance2 = circumfrence / static_cast<GLfloat>(a_nSubdivisionsB);
 
+	for (int i = 0; i < a_nSubdivisionsA; i++)
+	{
+		vertexesIn1.push_back(vector3(cos(angle) * a_fInnerRadius, sin(angle) * a_fInnerRadius, 0.0f));
+		vertexesOut1.push_back(vector3(cos(angle) * a_fOuterRadius, sin(angle) * a_fOuterRadius, 0.0f));
+		angle += angleAdvance;
+	}
+	for (int i = 0; i < a_nSubdivisionsB; i++)
+	{
+		vertexesIn2.push_back((vector3(cos(angle) * a_fInnerRadius, sin(angle) * a_fInnerRadius, 0.0f)));
+		vertexesOut2.push_back(vector3(cos(angle) * a_fOuterRadius, sin(angle) * a_fOuterRadius, 0.0f));
+		angle2 += angleAdvance2;
+	}
+	for (int i = 0; i < a_nSubdivisionsA; i++)
+	{
+		AddQuad(vertexesIn1[i], vertexesIn2[i], vertexesIn1[(i + 1) % a_nSubdivisionsA], vertexesIn2[(i + 1) % a_nSubdivisionsA]);
+		AddQuad(vertexesOut1[(i + 1) % a_nSubdivisionsA], vertexesOut2[(i + 1) % a_nSubdivisionsA], vertexesOut1[i], vertexesOut2[i]);
+		AddQuad(vertexesIn1[(i + 1) % a_nSubdivisionsA], vertexesOut1[(i + 1) % a_nSubdivisionsA], vertexesIn1[i], vertexesOut1[i]);
+		AddQuad(vertexesIn2[i], vertexesOut2[i], vertexesIn2[(i + 1) % a_nSubdivisionsA], vertexesOut2[(i + 1) % a_nSubdivisionsA]);
+	}
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
