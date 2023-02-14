@@ -165,7 +165,7 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 		AddQuad(vertexesIn1[i], vertexesIn2[i], vertexesIn1[(i + 1) % a_nSubdivisions], vertexesIn2[(i + 1) % a_nSubdivisions]);
 		AddQuad(vertexesOut1[(i + 1) % a_nSubdivisions], vertexesOut2[(i + 1) % a_nSubdivisions], vertexesOut1[i], vertexesOut2[i]);
 		AddQuad(vertexesIn1[(i + 1) % a_nSubdivisions], vertexesOut1[(i + 1) % a_nSubdivisions], vertexesIn1[i], vertexesOut1[i]);
-		AddQuad( vertexesIn2[i], vertexesOut2[i], vertexesIn2[(i + 1) % a_nSubdivisions], vertexesOut2[(i + 1) % a_nSubdivisions]);
+		AddQuad(vertexesIn2[i], vertexesOut2[i], vertexesIn2[(i + 1) % a_nSubdivisions], vertexesOut2[(i + 1) % a_nSubdivisions]);
 	}
 
 	// Adding information about color
@@ -196,10 +196,16 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Release();
 	Init();
 
-	std::vector<vector3> vertexesIn1;
-	std::vector<vector3> vertexesIn2;
-	std::vector<vector3> vertexesOut1;
-	std::vector<vector3> vertexesOut2;
+	/*std::vector<vector3> vertexes;
+	std::vector<vector3> normals;
+	std::vector<float> texCoords;
+	std::vector<vector3> tangents;*/
+
+	std::vector<vector3> vertexesOuter;
+	std::vector<vector3> vertexesInner;
+	std::vector<vector3> centerVertexes;
+	std::vector<std::vector<vector3>> vectorVertexes;
+	GLfloat verticalRadius = (a_fOuterRadius - a_fInnerRadius) / 2;
 	GLfloat angle = 0;
 	GLfloat angle2 = 0;
 	GLfloat numTriangles = static_cast<GLfloat>(a_nSubdivisionsA);
@@ -207,25 +213,73 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	GLfloat angleAdvance = circumfrence / numTriangles;	//circumfrence = PI * diameter using this can find delta (the angle) for each triangle
 	GLfloat angleAdvance2 = circumfrence / static_cast<GLfloat>(a_nSubdivisionsB);
 
+	//for (int i = 0; i < a_nSubdivisionsA; i++)
+	//{
+	//	float u = i * angleAdvance;
+	//	for (int j = 0; j < a_nSubdivisionsB; j++)
+	//	{
+	//		float v = (j % a_nSubdivisionsB) * angleAdvance2;
+	//		for (int k = 0; k < 2; k++)
+	//		{
+	//			float uu = u + k * angleAdvance;
+	//			// compute vertex
+	//			float x = (a_fOuterRadius + a_fInnerRadius * cos(v)) * cos(uu);
+	//			float y = (a_fOuterRadius + a_fInnerRadius * cos(v) * sin(uu));
+	//			float z = a_fInnerRadius * sin(v);
+
+	//			float nx = cos(v) * cos(uu);
+	//			float ny = cos(v) * sin(uu);
+	//			float nz = sin(v);
+
+	//			// compute texture coords
+	//			float tx = uu / (2 * PI);
+	//			float ty = v / (2 * PI);
+
+	//			// add tex coords
+	//			texCoords.push_back(tx);
+	//			texCoords.push_back(ty);
+
+	//			// add tangent vector
+	//			// T = d(S)/du
+	//			// S(u) is the circle at constant v
+	//			glm::vec3 tg(-(a_fOuterRadius + a_fInnerRadius * cos(v)) * sin(uu), (a_fOuterRadius + a_fInnerRadius * cos(v)) *cos(uu), 0.0f);
+	//			tg = glm::normalize(tg);
+
+	//			vertexes.push_back(vector3(x, y, z));
+	//			normals.push_back(vector3(nx, ny, nz));
+	//			tangents.push_back(vector3(tg.x, tg.y, tg.z));
+	//			
+	//		}
+	//		// incr angle
+	//		v += angleAdvance2;
+	//	}
+	//}
+
 	for (int i = 0; i < a_nSubdivisionsA; i++)
 	{
-		vertexesIn1.push_back(vector3(cos(angle) * a_fInnerRadius, sin(angle) * a_fInnerRadius, 0.0f));
-		vertexesOut1.push_back(vector3(cos(angle) * a_fOuterRadius, sin(angle) * a_fOuterRadius, 0.0f));
+		GLfloat x = cos(angle) * a_fOuterRadius - (cos(angle) * (a_fOuterRadius - a_fInnerRadius));
+		GLfloat y = sin(angle) * a_fOuterRadius - (sin(angle) * (a_fOuterRadius - a_fInnerRadius));
+		GLfloat z = 0.0f;
+		
+		for (int t = 0; t < a_nSubdivisionsB; t++)
+		{
+			centerVertexes.push_back(vector3(y + (cos(angle2) * verticalRadius),z + (sin(angle2) * verticalRadius),x));
+			angle2 += angleAdvance2;
+		}
+		vectorVertexes.push_back(centerVertexes);
+		centerVertexes.clear();
 		angle += angleAdvance;
 	}
-	for (int i = 0; i < a_nSubdivisionsB; i++)
+	for (int t = 0; t < vectorVertexes.size(); t++)
 	{
-		vertexesIn2.push_back((vector3(cos(angle) * a_fInnerRadius, sin(angle) * a_fInnerRadius, 0.0f)));
-		vertexesOut2.push_back(vector3(cos(angle) * a_fOuterRadius, sin(angle) * a_fOuterRadius, 0.0f));
-		angle2 += angleAdvance2;
+		for (int i = 0; i < a_nSubdivisionsB; i++)
+		{
+			AddQuad(vectorVertexes[t][(i + 1) % a_nSubdivisionsB], vectorVertexes[(t + 1) % (vectorVertexes.size())][(i + 1) % a_nSubdivisionsB],vectorVertexes[t][i], vectorVertexes[(t + 1) % (vectorVertexes.size())][i] );
+			AddQuad(vectorVertexes[t][i], vectorVertexes[(t + 1) % (vectorVertexes.size())][i], vectorVertexes[t][(i + 1) % a_nSubdivisionsB], vectorVertexes[(t + 1) % (vectorVertexes.size())][(i + 1) % a_nSubdivisionsB]);
+		}
 	}
-	for (int i = 0; i < a_nSubdivisionsA; i++)
-	{
-		AddQuad(vertexesIn1[i], vertexesIn2[i], vertexesIn1[(i + 1) % a_nSubdivisionsA], vertexesIn2[(i + 1) % a_nSubdivisionsA]);
-		AddQuad(vertexesOut1[(i + 1) % a_nSubdivisionsA], vertexesOut2[(i + 1) % a_nSubdivisionsA], vertexesOut1[i], vertexesOut2[i]);
-		AddQuad(vertexesIn1[(i + 1) % a_nSubdivisionsA], vertexesOut1[(i + 1) % a_nSubdivisionsA], vertexesIn1[i], vertexesOut1[i]);
-		AddQuad(vertexesIn2[i], vertexesOut2[i], vertexesIn2[(i + 1) % a_nSubdivisionsA], vertexesOut2[(i + 1) % a_nSubdivisionsA]);
-	}
+
+	
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
