@@ -260,10 +260,13 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 		GLfloat x = cos(angle) * a_fOuterRadius - (cos(angle) * (a_fOuterRadius - a_fInnerRadius));
 		GLfloat y = sin(angle) * a_fOuterRadius - (sin(angle) * (a_fOuterRadius - a_fInnerRadius));
 		GLfloat z = 0.0f;
+		vector2 tg = vector2(x, y);
+		tg = glm::rotate(tg, angle);
+		
 		
 		for (int t = 0; t < a_nSubdivisionsB; t++)
 		{
-			centerVertexes.push_back(vector3(y + (cos(angle2) * verticalRadius),z + (sin(angle2) * verticalRadius),x));
+			centerVertexes.push_back(vector3(tg.y + (cos(angle2) * verticalRadius),z + (sin(angle2) * verticalRadius),tg.x));
 			angle2 += angleAdvance2;
 		}
 		vectorVertexes.push_back(centerVertexes);
