@@ -250,6 +250,7 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Release();
 	Init();
 
+
 	std::vector<vector3> vertexes;
 	std::vector<std::vector<vector3>> vectorVertexes;
 	std::vector<vector3> vertexes3;
@@ -263,14 +264,14 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	for (int i = 0; i < 2 * a_nSubdivisions; i++)
 	{
 		float radius = sqrt((a_fRadius * a_fRadius) - (height * height));
-		if (radius == 0)
+		/*if (radius == 0)
 		{
 			vertexes.push_back(vector3(sin(0) * radius, height, cos(0) * radius));
 			vectorVertexes.push_back(vertexes);
 			vertexes.clear();
 		}
 		else
-		{
+		{*/
 			for (int t = 0; t < a_nSubdivisions; t++)
 			{
 				vertexes.push_back(vector3(sin(angle) * radius, height, cos(angle) * radius));
@@ -278,7 +279,7 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 			}
 			vectorVertexes.push_back(vertexes);
 			vertexes.clear();
-		}
+		//}
 		height += heightStep;
 	}
 
