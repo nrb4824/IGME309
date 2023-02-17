@@ -253,7 +253,6 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 
 	std::vector<vector3> vertexes;
 	std::vector<std::vector<vector3>> vectorVertexes;
-	std::vector<vector3> vertexes3;
 	GLfloat angle = 0;
 	GLfloat height = -a_fRadius;
 	GLfloat numTriangles = static_cast<GLfloat>(a_nSubdivisions);
@@ -264,22 +263,14 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	for (int i = 0; i < 2 * a_nSubdivisions; i++)
 	{
 		float radius = sqrt((a_fRadius * a_fRadius) - (height * height));
-		/*if (radius == 0)
+		for (int t = 0; t < a_nSubdivisions; t++)
 		{
-			vertexes.push_back(vector3(sin(0) * radius, height, cos(0) * radius));
-			vectorVertexes.push_back(vertexes);
-			vertexes.clear();
+			vertexes.push_back(vector3(sin(angle) * radius, height, cos(angle) * radius));
+			angle += angleAdvance;
 		}
-		else
-		{*/
-			for (int t = 0; t < a_nSubdivisions; t++)
-			{
-				vertexes.push_back(vector3(sin(angle) * radius, height, cos(angle) * radius));
-				angle += angleAdvance;
-			}
-			vectorVertexes.push_back(vertexes);
-			vertexes.clear();
-		//}
+		vectorVertexes.push_back(vertexes);
+		vertexes.clear();
+		
 		height += heightStep;
 	}
 
