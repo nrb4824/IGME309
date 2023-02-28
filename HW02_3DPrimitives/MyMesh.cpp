@@ -44,6 +44,47 @@ void MyMesh::GenerateCube(float a_fSize, vector3 a_v3Color)
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+
+
+//Generate Wave cylinder(a_nSubdivisionsCircle, a_nSubdivisionsLenght a_fCircleRadius, a_fLenght) {
+//	float fDelta = 2.0f * PI / a_nSubdivisionsCircle;
+//
+//	std::vector<std::vector<vector3>> circleList;
+//	float fOrigin = -a_fLenght / 2.0f;
+//	float x = fOrigin;
+//	for(uint j = 0; j < a_nSubdivisionsLenght + 2; j++)
+//	{
+//		float fDisplacement = 0;
+//		if(j > 0)
+//		{
+//			fDisplacement = (a_fLenght / a_nSubdivisionsLenght) * j;
+//		}
+//		x = forigin + fDisplacement
+// 
+//		std::vector << vector3 > circlePoints;
+//		for (uint i = 0; i < a_nSubdivisionsCircle; i++)
+//		{
+//			float y = glm::sin(fDelta * i) * a_fCircleRadius;
+//			float z = glm::cos(fDelta * i) * a_fCircleRadius * -1.0f;
+//			circlePoints.push_back(vector3(x, y, z));
+//		}
+//		for (uint j = 0; j < a_nSubdivisionsLenght + 1; j++)
+//		{
+//			for (uint i = -; i < a_nSubdivisionsCircle; i++)
+//			{
+//				vector3 v1 = circleList[j][i];
+//				vector3 v2 = circleList[(j+1) % a_nSubdivisionsLenght][i];
+//				vector3 v3 = circleList[j][(i+1) % a_nSubdivisionsCircle];
+//				vector3 v4 = circleList[(j+1) % a_nSubdivisionsLenght][(i+1) % a_nSubdivisionsCircle];
+//				AddQuad(v1, v2, v3, v4);
+//			}
+//		}
+//		
+//}
+//
+//
+//}
+
 void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
 {
 	if (a_fRadius < 0.01f)
