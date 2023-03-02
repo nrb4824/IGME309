@@ -52,19 +52,15 @@ void MyMesh::GenerateCube(float a_fSize, vector3 a_v3Color)
 //	std::vector<std::vector<vector3>> circleList;
 //	float fOrigin = -a_fLenght / 2.0f;
 //	float x = fOrigin;
+//	float y = 0.0f;
+//	float fDisplacement = a_fLenght / (a_nSubdivisionsLenght + 1);
 //	for(uint j = 0; j < a_nSubdivisionsLenght + 2; j++)
 //	{
-//		float fDisplacement = 0;
-//		if(j > 0)
-//		{
-//			fDisplacement = (a_fLenght / a_nSubdivisionsLenght) * j;
-//		}
-//		x = forigin + fDisplacement
-// 
+//		x = forigin + fDisplacement * j;
 //		std::vector << vector3 > circlePoints;
 //		for (uint i = 0; i < a_nSubdivisionsCircle; i++)
 //		{
-//			float y = glm::sin(fDelta * i) * a_fCircleRadius;
+//			y = glm::sin(fDelta * i) * a_fCircleRadius + glm::sin((2.0 * PI) / (a_nSubdivisionsLenght + 1) * j);  // after + for full extra credit
 //			float z = glm::cos(fDelta * i) * a_fCircleRadius * -1.0f;
 //			circlePoints.push_back(vector3(x, y, z));
 //		}
