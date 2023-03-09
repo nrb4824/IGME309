@@ -110,6 +110,10 @@ void MyCamera::CalculateProjectionMatrix(void)
 {
 	//perspective
 	float fRatio = 1280.0f / 720.0f;
-	m_m4Projection = glm::perspective(45.0f, fRatio, 0.001f, 1000.0f);
+	static float fFOV = 45.0f;
+	static float fNear = 0.001f;
+	static float fFar = 12.0f;
+	m_m4Projection = glm::perspective(glm::radians(45.0f), fRatio, fNear, fFar);
 	//m_m4Projection = glm::ortho(-5.0f * fRatio, 5.0f * fRatio, -5.0f, 5.0f, 0.001f, 1000.0f);
+	fNear += 0.1f;
 }
