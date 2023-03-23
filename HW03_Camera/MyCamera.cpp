@@ -5,8 +5,10 @@ void MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3 a_v3Targ
 {
 	//TODO:: replace the super call with your functionality
 	//Tip: Changing any positional vector forces you to calculate new directional ones
-	super::SetPositionTargetAndUpward(a_v3Position, a_v3Target, a_v3Upward);
-
+	//super::SetPositionTargetAndUpward(a_v3Position, a_v3Target, a_v3Upward);
+	m_v3Position = a_v3Position;
+	m_v3Target = a_v3Target;
+	m_v3Upward = a_v3Upward;
 	//After changing any vectors you need to recalculate the MyCamera View matrix.
 	//While this is executed within the parent call above, when you remove that line
 	//you will still need to call it at the end of this method
@@ -40,6 +42,39 @@ void MyCamera::CalculateView(void)
 	//		 it will receive information from the main code on how much these orientations
 	//		 have change so you only need to focus on the directional and positional 
 	//		 vectors. There is no need to calculate any right click process or connections.
+
+	//limit pitch to less then 90
+	if (m_v3PitchYawRoll.y > PI / 2)
+	{
+		m_v3PitchYawRoll.y = PI / 2 - .0001f;
+	}
+	else if (m_v3PitchYawRoll.y < -PI / 2)
+	{
+		m_v3PitchYawRoll.y = -PI / 2 + .0001f;
+	}
+	float yaw = m_v3PitchYawRoll.y;
+	float pitch = m_v3PitchYawRoll.x;
+
+	//calculate for forward vector
+	m_v3Forward.x = -sin(yaw) * cos(pitch);
+	m_v3Forward.y = -sin(pitch);
+	m_v3Forward.z = -cos(yaw) * cos(pitch);
+
+	//Calculate for right vector
+	m_v3Rightward.x = -cos(yaw);
+	m_v3Rightward.y = 0.0;
+	m_v3Rightward.z = sin(yaw);
+
+	//get the cross product
+	m_v3Upward = cross(m_v3Forward, m_v3Rightward);
+
+	//normalize the vectors
+	m_v3Forward = normalize(m_v3Forward);
+	m_v3Rightward = normalize(m_v3Rightward);
+	m_v3Upward = normalize(m_v3Upward);
+
+
+	//https://stackoverflow.com/questions/34378214/how-to-move-around-camera-using-mouse-in-opengl
 	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upward);
 }
 //You can assume that the code below does not need changes unless you expand the functionality
