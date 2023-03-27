@@ -50,7 +50,35 @@ void MyCamera::CalculateView(void)
 	//		 have change so you only need to focus on the directional and positional 
 	//		 vectors. There is no need to calculate any right click process or connections.
 
-	float pitch = m_v3PitchYawRoll.x;
+	//limit pitch to less than 90 degrees
+	if (m_v3PitchYawRoll.x > PI / 2) {
+		m_v3PitchYawRoll.x = (PI / 2) - .0001f;
+	}
+	else if (m_v3PitchYawRoll.x < -(PI / 2)) {
+		m_v3PitchYawRoll.x = -(PI / 2) + .0001f;
+	}
+
+	//creates the pitch, yaw, roll quaternions from m_v3PitchYawRoll
+	quaternion pitch = glm::angleAxis(m_v3PitchYawRoll.x, vector3(1.0f, 0.0f, 0.0f));
+	quaternion yaw = glm::angleAxis(m_v3PitchYawRoll.y, vector3(0.0f, -1.0f, 0.0f));
+	quaternion roll = glm::angleAxis(m_v3PitchYawRoll.z, vector3(0.0f, 0.0f, 1.0f));
+
+	//sets orientation, only pitch and yaw because we don't care about roll
+	quaternion static orientation;
+	orientation = pitch * yaw;
+	orientation = glm::normalize(orientation);
+	
+	//Set the forward, rightward, and upward vectors with rotation.
+	m_v3Forward = vector3(0.0f, 0.0f, 1.0f) * orientation;
+	m_v3Rightward = vector3(1.0f, 0.0f, 0.0f) * orientation;
+	m_v3Upward = vector3(0.0f, 1.0f, 0.0f) * orientation;
+
+	//set target
+	m_v3Target = m_v3Position + m_v3Forward;
+
+	//This is my original vector/ math way to do this. It works but didn't want to lose the 30% for no quaternions, even though the math is how the quaternions work anyways.
+
+	/*float pitch = m_v3PitchYawRoll.x;
 	float yaw = m_v3PitchYawRoll.y;
 
 	//limit pitch to less then 90
@@ -73,12 +101,13 @@ void MyCamera::CalculateView(void)
 	m_v3Rightward.y = 0.0;
 	m_v3Rightward.z = sin(yaw);
 
-	//get the cross product
+	////get the cross product
 	m_v3Upward = cross(m_v3Forward, m_v3Rightward);
-	m_v3Target = m_v3Position + m_v3Forward;
+	m_v3Target = m_v3Position + m_v3Forward;*/
 
 	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upward);
 }
+
 //You can assume that the code below does not need changes unless you expand the functionality
 //of the class or create helper methods, etc.
 void MyCamera::Init(vector3 a_v3Position, vector3 a_v3Target, vector3 a_v3Upward)
