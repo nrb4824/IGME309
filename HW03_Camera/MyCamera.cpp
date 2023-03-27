@@ -5,7 +5,6 @@ void MyCamera::SetPositionTargetAndUpward(vector3 a_v3Position, vector3 a_v3Targ
 {
 	//TODO:: replace the super call with your functionality
 	//Tip: Changing any positional vector forces you to calculate new directional ones
-	//super::SetPositionTargetAndUpward(a_v3Position, a_v3Target, a_v3Upward);
 	m_v3Position = a_v3Position;
 	m_v3Target = a_v3Target;
 	m_v3Upward = a_v3Upward;
@@ -23,16 +22,24 @@ void MyCamera::MoveForward(float a_fDistance)
 	//		 in the _Binary folder you will notice that we are moving 
 	//		 backwards and we never get closer to the plane as we should 
 	//		 because as we are looking directly at it.
-	m_v3Position += vector3(0.0f, 0.0f, a_fDistance);
-	m_v3Target += vector3(0.0f, 0.0f, a_fDistance);
+
+	//Update position and Target to move relative to camera view
+	m_v3Position += m_v3Forward * a_fDistance;
+	m_v3Target += m_v3Forward * a_fDistance;
 }
 void MyCamera::MoveVertical(float a_fDistance)
 {
 	//Tip:: Look at MoveForward
+	//Update position and Target to move relative to camera view
+	m_v3Position -= m_v3Upward * a_fDistance;
+	m_v3Target -= m_v3Upward * a_fDistance;
 }
 void MyCamera::MoveSideways(float a_fDistance)
 {
 	//Tip:: Look at MoveForward
+	//Update position and Target to move relative to camera view
+	m_v3Position -= m_v3Rightward * a_fDistance;
+	m_v3Target -= m_v3Rightward * a_fDistance;
 }
 void MyCamera::CalculateView(void)
 {
@@ -43,21 +50,22 @@ void MyCamera::CalculateView(void)
 	//		 have change so you only need to focus on the directional and positional 
 	//		 vectors. There is no need to calculate any right click process or connections.
 
-	//limit pitch to less then 90
-	if (m_v3PitchYawRoll.y > PI / 2)
-	{
-		m_v3PitchYawRoll.y = PI / 2 - .0001f;
-	}
-	else if (m_v3PitchYawRoll.y < -PI / 2)
-	{
-		m_v3PitchYawRoll.y = -PI / 2 + .0001f;
-	}
-	float yaw = m_v3PitchYawRoll.y;
 	float pitch = m_v3PitchYawRoll.x;
+	float yaw = m_v3PitchYawRoll.y;
 
+	//limit pitch to less then 90
+	if (pitch > PI/2)
+	{
+		pitch = (PI/2) -.0001f;
+	}
+	else if (pitch < -(PI/2))
+	{
+		pitch = -(PI / 2) + .0001f;
+	}
+	
 	//calculate for forward vector
 	m_v3Forward.x = -sin(yaw) * cos(pitch);
-	m_v3Forward.y = -sin(pitch);
+	m_v3Forward.y = sin(pitch);
 	m_v3Forward.z = -cos(yaw) * cos(pitch);
 
 	//Calculate for right vector
@@ -67,14 +75,8 @@ void MyCamera::CalculateView(void)
 
 	//get the cross product
 	m_v3Upward = cross(m_v3Forward, m_v3Rightward);
+	m_v3Target = m_v3Position + m_v3Forward;
 
-	//normalize the vectors
-	m_v3Forward = normalize(m_v3Forward);
-	m_v3Rightward = normalize(m_v3Rightward);
-	m_v3Upward = normalize(m_v3Upward);
-
-
-	//https://stackoverflow.com/questions/34378214/how-to-move-around-camera-using-mouse-in-opengl
 	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upward);
 }
 //You can assume that the code below does not need changes unless you expand the functionality
