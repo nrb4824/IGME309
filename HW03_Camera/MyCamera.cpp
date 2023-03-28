@@ -38,8 +38,8 @@ void MyCamera::MoveSideways(float a_fDistance)
 {
 	//Tip:: Look at MoveForward
 	//Update position and Target to move relative to camera view
-	m_v3Position -= m_v3Rightward * a_fDistance;
-	m_v3Target -= m_v3Rightward * a_fDistance;
+	m_v3Position += m_v3Rightward * a_fDistance;
+	m_v3Target += m_v3Rightward * a_fDistance;
 }
 void MyCamera::CalculateView(void)
 {
@@ -59,7 +59,7 @@ void MyCamera::CalculateView(void)
 	}
 
 	//creates the pitch, yaw, roll quaternions from m_v3PitchYawRoll
-	quaternion pitch = glm::angleAxis(m_v3PitchYawRoll.x, vector3(1.0f, 0.0f, 0.0f));
+	quaternion pitch = glm::angleAxis(m_v3PitchYawRoll.x, vector3(-1.0f, 0.0f, 0.0f));
 	quaternion yaw = glm::angleAxis(m_v3PitchYawRoll.y, vector3(0.0f, -1.0f, 0.0f));
 	quaternion roll = glm::angleAxis(m_v3PitchYawRoll.z, vector3(0.0f, 0.0f, 1.0f));
 
@@ -69,7 +69,7 @@ void MyCamera::CalculateView(void)
 	orientation = glm::normalize(orientation);
 	
 	//Set the forward, rightward, and upward vectors with rotation.
-	m_v3Forward = vector3(0.0f, 0.0f, 1.0f) * orientation;
+	m_v3Forward = vector3(0.0f, 0.0f, -1.0f) * orientation;
 	m_v3Rightward = vector3(1.0f, 0.0f, 0.0f) * orientation;
 	m_v3Upward = vector3(0.0f, 1.0f, 0.0f) * orientation;
 
