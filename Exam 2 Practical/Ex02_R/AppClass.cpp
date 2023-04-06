@@ -4,9 +4,21 @@ void Application::RenderFromInsidePumpkin(matrix4 m4PumpkinToWorld)
 {
 	//make sure you have these vectors in the Pumpkin space, as they are, the
 	//argument is not involved
-	vector3 v3Position = m_v3Pumpkin;
-	vector3 v3Target = v3Position + AXIS_Z;
-	vector3 v3Above = v3Position + AXIS_Y;
+	vector3 v3Position = glm::vec3(m4PumpkinToWorld[3]);
+	vector3 x = glm::vec3(m4PumpkinToWorld[0]);
+	vector3 y = glm::vec3(m4PumpkinToWorld[1]);
+	vector3 z = glm::vec3(m4PumpkinToWorld[2]);
+	quaternion x_axis = glm::angleAxis(x.x * x.y * x.z, vector3(1.0f, 0.0f, 0.0f));
+	quaternion y_axis = glm::angleAxis(y.x * y.y * y.z, vector3(0.0f, 1.0f, 0.0f));
+	quaternion z_axis = glm::angleAxis(z.x * z.y * z.z, vector3(0.0f, 0.0f, 1.0f));
+
+	quaternion static orientation;
+	orientation = x_axis * y_axis * z_axis;
+	vector3 m_v3Forward = AXIS_Z * orientation;
+	vector3 m_v3Upward = AXIS_Y * orientation;
+
+	vector3 v3Target = v3Position + m_v3Forward;
+	vector3 v3Above = v3Position + m_v3Upward;
 	
 #pragma region DOES NOT NEED CHANGES
 	//Set the position and target of the camera

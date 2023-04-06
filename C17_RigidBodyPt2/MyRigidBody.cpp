@@ -217,7 +217,8 @@ void MyRigidBody::AddToRenderList(void)
 bool MyRigidBody::IsColliding(MyRigidBody* const other)
 {
 	//check if spheres are colliding
-	bool bColliding = (glm::distance(GetCenterGlobal(), other->GetCenterGlobal()) < m_fRadius + other->m_fRadius);
+	bool bColliding = true;
+	bColliding = (glm::distance(GetCenterGlobal(), other->GetCenterGlobal()) < m_fRadius + other->m_fRadius);
 	//if they are check the Axis Aligned Bounding Box
 	if (bColliding) //they are colliding with bounding sphere
 	{

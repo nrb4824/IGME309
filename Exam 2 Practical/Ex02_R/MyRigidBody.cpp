@@ -15,13 +15,60 @@ MyRigidBody::MyRigidBody(std::vector<vector3> a_pointList)
 	//Init m_v3MaxL, m_v3MinL, m_v3MaxG, m_v3MinG, m_v3Center, m_v3Halfwidth, m_fRadius
 	//with the right values below
 
-	//Max and min as the first vector of the list
-	m_v3MaxL = m_v3MaxG = vector3(1.0f);
-	m_v3MinL = m_v3MinG = vector3(1.0f);
-	m_v3Center = ZERO_V3;
-	m_v3HalfWidth = vector3(0.5f);
-	m_fRadius = 0.775f;
+	//_________________________________________________________________________________________________________________________________
+	//m_v3MaxL = m_v3MinL = a_pointList[0];
+
+	//for (uint i = 1; i < uVertexCount; ++i)
+	//{
+	//	if (m_v3MaxL.x < a_pointList[i].x) m_v3MaxL.x = a_pointList[i].x;
+	//	else if (m_v3MinL.x > a_pointList[i].x) m_v3MinL.x = a_pointList[i].x;
+
+	//	if (m_v3MaxL.y < a_pointList[i].y) m_v3MaxL.y = a_pointList[i].y;
+	//	else if (m_v3MinL.y > a_pointList[i].y) m_v3MinL.y = a_pointList[i].y;
+
+	//	if (m_v3MaxL.z < a_pointList[i].y) m_v3MaxL.z = a_pointList[i].z;
+	//	else if (m_v3MinL.z > a_pointList[i].z) m_v3MinL.z = a_pointList[i].z;
+	//}
+	//m_v3MaxG = m_v3MaxL;
+	//m_v3MinG = m_v3MinL;
+
+	//m_v3Center = (m_v3MaxL + m_v3MinL) / 2.0f;
+
+	//m_v3HalfWidth = (m_v3MaxL - m_v3MinL) / 2.0f;
+
+	//m_fRadius = glm::distance(m_v3Center, m_v3MinL);
+	//_________________________________________________________________________________________________________________________________
+
+	m_v3MaxL = m_v3MinL = a_pointList[0];
+	for (uint i = 0; i < uVertexCount; ++i)
+	{
+		if (m_v3MaxL.x < a_pointList[i].x) m_v3MaxL.x = a_pointList[i].x;
+		else if (m_v3MinL.x > a_pointList[i].x) m_v3MinL.x = a_pointList[i].x;
+
+		if (m_v3MaxL.y < a_pointList[i].y) m_v3MaxL.y = a_pointList[i].y;
+		else if (m_v3MinL.y > a_pointList[i].y) m_v3MinL.y = a_pointList[i].y;
+
+		if (m_v3MaxL.z < a_pointList[i].z) m_v3MaxL.z = a_pointList[i].z;
+		else if (m_v3MinL.z > a_pointList[i].z) m_v3MinL.z = a_pointList[i].z;
+	}
+
+	m_v3MaxG = m_v3MaxL;
+	m_v3MinG = m_v3MinL;
+
+	m_v3Center = (m_v3MaxL + m_v3MinL) / 2.0f;
+
+	m_v3HalfWidth = (m_v3MaxL - m_v3MinL) / 2.0f;
+
+	m_fRadius = glm::distance(m_v3Center, m_v3MinL);
 }
+
+//_________________________________________________________________________________________________________________________________
+//vector3 makeGlobal(matrix4 a_m4ToWorld, vector3 a_v3Input) { return a_m4ToWorld * vector4(a_v3Input, 1.0f); }
+
+//_________________________________________________________________________________________________________________________________
+
+vector3 MakeGlobal(matrix4 m4ToWorld, vector3 input) { return m4ToWorld * vector4(input, 1.0f); }
+
 void MyRigidBody::SetModelMatrix(matrix4 a_m4ModelMatrix)
 {
 #pragma region Does NOT need changes
@@ -33,6 +80,47 @@ void MyRigidBody::SetModelMatrix(matrix4 a_m4ModelMatrix)
 	m_m4ToWorld = a_m4ModelMatrix;
 #pragma endregion
 	//Calculate ARBB here by modifying all involved variables
+
+	//_________________________________________________________________________________________________________________________________
+	/*std::vector<vector3> cornerList;
+	cornerList.push_back(vector3(m_v3MinL.x, m_v3MinL.y, m_v3MinL.z));
+	cornerList.push_back(vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MinL.z));
+	cornerList.push_back(vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MaxL.z));
+	cornerList.push_back(vector3(m_v3MinL.x, m_v3MinL.y, m_v3MaxL.z));
+	cornerList.push_back(vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MinL.z));
+	cornerList.push_back(vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MinL.z));
+	cornerList.push_back(vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MaxL.z));
+	cornerList.push_back(vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MaxL.z));
+
+	for (uint i = 0; i < 8; i++)
+	{
+		cornerList[i] = makeGlobal(this->m_m4ToWorld, cornerList[i]);
+	}
+
+	MyRigidBody oTemp(cornerList);
+	m_v3MinG = oTemp.m_v3MinL;
+	m_v3MaxG = oTemp.m_v3MaxL;*/
+
+	//_________________________________________________________________________________________________________________________________
+
+	std::vector<vector3> cornerList;
+	cornerList.push_back(vector3(m_v3MinL.x, m_v3MinL.y, m_v3MinL.z));
+	cornerList.push_back(vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MinL.z));
+	cornerList.push_back(vector3(m_v3MinL.x, m_v3MinL.y, m_v3MaxL.z));
+	cornerList.push_back(vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MaxL.z));
+	cornerList.push_back(vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MinL.z));
+	cornerList.push_back(vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MinL.z));
+	cornerList.push_back(vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MaxL.z));
+	cornerList.push_back(vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MaxL.z));
+
+	for (uint i = 0; i < 8; ++i)
+	{
+		cornerList[i] = MakeGlobal(this->m_m4ToWorld, cornerList[i]);
+	}
+
+	MyRigidBody oTemp(cornerList);
+	m_v3MinG = oTemp.m_v3MinL;
+	m_v3MaxG = oTemp.m_v3MaxL;
 }
 
 bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
@@ -44,6 +132,27 @@ bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 	//Test if "this" and "a_pOther" are colliding, you can use BS or ARBB, 
 	//50% extra credit if you code SAT, extra credit will only be given if the
 	//rest of the test is at a 100% level
+	bColliding = (glm::distance(GetCenterGlobal(), a_pOther->GetCenterGlobal()) < m_fRadius + a_pOther->m_fRadius);
+	//_________________________________________________________________________________________________________________________________
+	//bounding sphere (BS)
+	/*bColliding = (glm::distance(GetCenterGlobal(), a_pOther->GetCenterGlobal()) < m_fRadius + a_pOther->m_fRadius);*/
+
+	//Axis ReAlligned Bounding Box (ARBB)
+	/*if (this->m_v3MaxG.x < a_pOther->m_v3MinG.x)bColliding = false;
+	if (this->m_v3MinG.x > a_pOther->m_v3MaxG.x)bColliding = false;
+	if (this->m_v3MinG.y > a_pOther->m_v3MaxG.y)bColliding = false;
+	if (this->m_v3MaxG.y < a_pOther->m_v3MinG.y)bColliding = false;
+	if (this->m_v3MaxG.z < a_pOther->m_v3MinG.z)bColliding = false;
+	if (this->m_v3MinG.z > a_pOther->m_v3MaxG.z)bColliding = false;*/
+
+	//_________________________________________________________________________________________________________________________________
+	if (this->m_v3MinG.x > a_pOther->m_v3MaxG.x) bColliding = false;
+	if (this->m_v3MaxG.x < a_pOther->m_v3MinG.x) bColliding = false;
+	if (this->m_v3MinG.y > a_pOther->m_v3MaxG.y) bColliding = false;
+	if (this->m_v3MaxG.y < a_pOther->m_v3MinG.y) bColliding = false;
+	if (this->m_v3MinG.z > a_pOther->m_v3MaxG.z) bColliding = false;
+	if (this->m_v3MaxG.z < a_pOther->m_v3MinG.z) bColliding = false;
+
 
 #pragma region Does NOT need changes
 	if (bColliding) //they are colliding
@@ -136,6 +245,7 @@ vector3 MyRigidBody::GetMinGlobal(void) { return m_v3MinG; }
 vector3 MyRigidBody::GetMaxGlobal(void) { return m_v3MaxG; }
 vector3 MyRigidBody::GetHalfWidth(void) { return m_v3HalfWidth; }
 matrix4 MyRigidBody::GetModelMatrix(void) { return m_m4ToWorld; }
+
 //The big 3
 MyRigidBody::MyRigidBody(MyRigidBody const& a_pOther)
 {
