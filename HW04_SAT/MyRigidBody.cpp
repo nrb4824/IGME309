@@ -6,6 +6,50 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	//TODO: Calculate the SAT algorithm I STRONGLY suggest you use the
 	//Real Time Collision detection algorithm for OBB here but feel free to
 	//implement your own solution.
+	//error with t = in pseudo code.The second Dot should be index 1.
+	//Epsilon is tollerance, it is like .00001.glm::Epsilon
+	//http://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf
+	//a.e[0] = x-axis, a.e[1] = y-axis, a.e[2] = z-axis.
+	//psedo code returns 1 if it couldn't find a plane that is sepeerating them and 0 if it could find a plane.
+
+	float ra, rb;
+	matrix3 R, AbsR;
+	//result is what the pseudo code returns.
+	int result;
+
+	//Compute rotation matrix expressing b in a's coordinate frame
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			R[i][j] = glm::dot(this->m_m4ToWorld[i], a_pOther->m_m4ToWorld[j]);
+		}
+	}
+
+	//Compute translation vector
+	//Maybe try m_mv3Center
+	vector3 t = a_pOther->GetCenterGlobal() - this->GetCenterGlobal();
+
+	//Bring translation into this coordinate frame
+	t = vector3(glm::dot(t, glm::vec3(this->m_m4ToWorld[0])), glm::dot(t, glm::vec3(this->m_m4ToWorld[1])), glm::dot(t, glm::vec3(this->m_m4ToWorld[2])));
+
+	//Compute common subexpressions. Add in an epsilon term to counteract arithmetic errors when two edges are parallel
+	// and their corss product is (near) null.
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			AbsR[i][j] = glm::abs(R[i][j]) + DBL_EPSILON;
+		}
+	}
+
+	//Test axes
+	for (int i = 0; i < 3; i++)
+	{
+		ra = this->GetHalfWidth()[i];
+		rb = a_pOther->GetHalfWidth()[0] * AbsR[i][0] + a_pOther->GetHalfWidth()[1] * AbsR[i][1] + a_pOther->GetHalfWidth()[2] * AbsR[i][2];
+		if (glm::abs(t[i]) > ra + rb) result = 0;
+	}
 	return BTXs::eSATResults::SAT_NONE;
 }
 bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
