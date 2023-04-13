@@ -3,19 +3,11 @@ using namespace BTX;
 //Allocation
 uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 {
-	//TODO: Calculate the SAT algorithm I STRONGLY suggest you use the
-	//Real Time Collision detection algorithm for OBB here but feel free to
-	//implement your own solution.
-	//error with t = in pseudo code.The second Dot should be index 1.
-	//Epsilon is tollerance, it is like .00001.glm::Epsilon
+	//Referenced the real-time collision detection code
 	//http://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf
-	//a.e[0] = x-axis, a.e[1] = y-axis, a.e[2] = z-axis.
-	//psedo code returns 1 if it couldn't find a plane that is sepeerating them and 0 if it could find a plane.
 
 	float ra, rb;
 	matrix3 R, AbsR;
-	//result is what the pseudo code returns.
-	int result;
 
 	//Compute rotation matrix expressing b in a's coordinate frame
 	for (int i = 0; i < 3; i++)
@@ -27,7 +19,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	}
 
 	//Compute translation vector
-	//Maybe try m_mv3Center
+	//Make sure to use global values
 	vector3 t = a_pOther->GetCenterGlobal() - this->GetCenterGlobal();
 
 	//Bring translation into this coordinate frame
@@ -43,13 +35,77 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		}
 	}
 
-	//Test axes
+	//Test axes for this object
 	for (int i = 0; i < 3; i++)
 	{
 		ra = this->GetHalfWidth()[i];
 		rb = a_pOther->GetHalfWidth()[0] * AbsR[i][0] + a_pOther->GetHalfWidth()[1] * AbsR[i][1] + a_pOther->GetHalfWidth()[2] * AbsR[i][2];
-		if (glm::abs(t[i]) > ra + rb) result = 0;
+		if (glm::abs(t[i]) > ra + rb)
+		{
+			if (i == 0) return BTXs::eSATResults::SAT_AX;
+			else if (i == 1) return BTXs::eSATResults::SAT_AY;
+			else return BTXs::eSATResults::SAT_AZ;
+		}
 	}
+
+	// Test axes for other object
+	for (int i = 0; i < 3; i++)
+	{
+		ra = this->GetHalfWidth()[0] * AbsR[0][i] + this->GetHalfWidth()[1] * AbsR[1][i] + this->GetHalfWidth()[2] * AbsR[2][i];
+		rb = a_pOther->GetHalfWidth()[i];
+		if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb)
+		{
+			if(i == 0) return BTXs::eSATResults::SAT_BX;
+			else if (i == 1) return BTXs::eSATResults::SAT_BY;
+			else return BTXs::eSATResults::SAT_BZ;
+		}
+	}
+
+	// test axis this[0] x other[0]
+	ra = this->GetHalfWidth()[1] * AbsR[2][0] + this->GetHalfWidth()[2] * AbsR[1][0];
+	rb = a_pOther->GetHalfWidth()[1] * AbsR[0][2] + a_pOther->GetHalfWidth()[2] * AbsR[0][1];
+	if (glm::abs(t[2] * R[1][0] - t[1] * R[2][0]) > ra + rb) return BTXs::eSATResults::SAT_AXxBX;
+
+	// Test axis this[0] x other[1]
+	ra = this->GetHalfWidth()[1] * AbsR[2][1] + this->GetHalfWidth()[2] * AbsR[1][1];
+	rb = a_pOther->GetHalfWidth()[0] * AbsR[0][2] + a_pOther->GetHalfWidth()[2] * AbsR[0][0];
+	if (glm::abs(t[2] * R[1][1] - t[1] * R[2][1]) > ra + rb) return BTXs::eSATResults::SAT_AXxBY;
+
+	// Test axis this[0] x other[2]
+	ra = this->GetHalfWidth()[1] * AbsR[2][2] + this->GetHalfWidth()[2] * AbsR[1][2];
+	rb = a_pOther->GetHalfWidth()[0] * AbsR[0][1] + a_pOther->GetHalfWidth()[1] * AbsR[0][0];
+	if (glm::abs(t[2] * R[1][2] - t[1] * R[2][2]) > ra + rb) return BTXs::eSATResults::SAT_AXxBZ;
+
+	// test axis this[1] x other[0]
+	ra = this->GetHalfWidth()[0] * AbsR[2][0] + this->GetHalfWidth()[2] * AbsR[0][0];
+	rb = a_pOther->GetHalfWidth()[1] * AbsR[1][2] + a_pOther->GetHalfWidth()[2] * AbsR[1][1];
+	if (glm::abs(t[0] * R[2][0] - t[2] * R[0][0]) > ra + rb) return BTXs::eSATResults::SAT_AYxBX;
+
+	// Test axis this[1] x other[1]
+	ra = this->GetHalfWidth()[0] * AbsR[2][1] + this->GetHalfWidth()[2] * AbsR[0][1];
+	rb = a_pOther->GetHalfWidth()[0] * AbsR[1][2] + a_pOther->GetHalfWidth()[2] * AbsR[1][0];
+	if (glm::abs(t[0] * R[2][1] - t[2] * R[0][1]) > ra + rb) return BTXs::eSATResults::SAT_AYxBY;
+
+	// Test axis this[1] x other[2]
+	ra = this->GetHalfWidth()[0] * AbsR[2][2] + this->GetHalfWidth()[2] * AbsR[0][2];
+	rb = a_pOther->GetHalfWidth()[0] * AbsR[1][1] + a_pOther->GetHalfWidth()[1] * AbsR[1][0];
+	if (glm::abs(t[0] * R[2][2] - t[2] * R[0][2]) > ra + rb) return BTXs::eSATResults::SAT_AYxBZ;
+
+	// test axis this[2] x other[0]
+	ra = this->GetHalfWidth()[0] * AbsR[1][0] + this->GetHalfWidth()[1] * AbsR[0][0];
+	rb = a_pOther->GetHalfWidth()[1] * AbsR[2][2] + a_pOther->GetHalfWidth()[2] * AbsR[2][1];
+	if (glm::abs(t[1] * R[0][0] - t[0] * R[1][0]) > ra + rb) return BTXs::eSATResults::SAT_AZxBX;
+
+	// Test axis this[2] x other[1]
+	ra = this->GetHalfWidth()[0] * AbsR[1][1] + this->GetHalfWidth()[1] * AbsR[0][1];
+	rb = a_pOther->GetHalfWidth()[0] * AbsR[2][2] + a_pOther->GetHalfWidth()[2] * AbsR[2][0];
+	if (glm::abs(t[1] * R[0][1] - t[0] * R[1][1]) > ra + rb) return BTXs::eSATResults::SAT_AZxBY;
+
+	// Test axis this[2] x other[2]
+	ra = this->GetHalfWidth()[0] * AbsR[1][2] + this->GetHalfWidth()[1] * AbsR[0][2];
+	rb = a_pOther->GetHalfWidth()[0] * AbsR[2][1] + a_pOther->GetHalfWidth()[1] * AbsR[2][0];
+	if (glm::abs(t[1] * R[0][2] - t[0] * R[1][2]) > ra + rb) return BTXs::eSATResults::SAT_AZxBZ;
+
 	return BTXs::eSATResults::SAT_NONE;
 }
 bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
@@ -65,12 +121,12 @@ bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 	{
 		uint nResult = SAT(a_pOther);
 
-		if (bColliding) //The SAT shown they are colliding
+		if (nResult == BTXs::eSATResults::SAT_NONE) //The SAT shown they are not colliding
 		{
 			this->AddCollisionWith(a_pOther);
 			a_pOther->AddCollisionWith(this);
 		}
-		else //they are not colliding
+		else //they are colliding
 		{
 			this->RemoveCollisionWith(a_pOther);
 			a_pOther->RemoveCollisionWith(this);
