@@ -16,6 +16,7 @@ void Application::InitVariables(void)
 	m_pCow = new MyEntity("Minecraft\\Cow.obj", "Cow");
 	m_pZombie = new MyEntity("Minecraft\\Zombie.obj", "Zombie");
 	m_pPig = new MyEntity("Minecraft\\Pig.obj", "Pig");
+	m_pSphereCube = new MyEntity("SphereCube.obj", "Sphere");
 }
 void Application::Update(void)
 {
@@ -45,6 +46,7 @@ void Application::Update(void)
 	m_pCow->SetModelMatrix(mCow);
 	m_pPig->SetModelMatrix(mPig);
 	m_pZombie->SetModelMatrix(mZombie);
+	m_pSphereCube->SetModelMatrix(glm::translate(vector3(-3.0f, 0.0f, 0.0f)));
 
 	//Check collision
 	bool bColliding = m_pCreeper->IsColliding(m_pSteve);
@@ -63,6 +65,8 @@ void Application::Update(void)
 	m_pZombie->AddToRenderList(true);
 	m_pPig->AddToRenderList(true);
 	m_pCow->AddToRenderList(true);
+
+	m_pSphereCube->AddToRenderList(true);
 
 	/*
 	* Note 2: 

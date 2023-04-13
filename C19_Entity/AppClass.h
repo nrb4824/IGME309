@@ -24,6 +24,7 @@ class Application
 	MyEntity* m_pZombie = nullptr; //Entity that represents the Steve model
 	MyEntity* m_pCow = nullptr; //Entity that represents the Steve model
 	MyEntity* m_pPig = nullptr; //Entity that represents the Steve model
+	MyEntity* m_pSphereCube = nullptr;
 
 	vector3 m_v3Creeper; //position of the creeper
 	quaternion m_qCreeper; //orientation for the creeper

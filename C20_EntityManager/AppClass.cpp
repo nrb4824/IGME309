@@ -11,6 +11,8 @@ void Application::InitVariables(void)
 	//Entity Manager
 	m_pEntityMngr = MyEntityManager::GetInstance();
 
+	m_pEntityMngr->AddEntity("SphereCube.obj", "Object");
+
 	//creeper
 	m_pEntityMngr->AddEntity("Minecraft\\Creeper.obj", "Creeper");
 	m_pEntityMngr->SetAxisVisibility(true, "Creeper"); //set visibility of the entity's axis
@@ -36,6 +38,8 @@ void Application::InitVariables(void)
 	//set the model matrix and visibility of the last entity added
 	m_pEntityMngr->SetModelMatrix(glm::translate(vector3(-2.0f, -1.0f, -1.0f)));
 	m_pEntityMngr->SetAxisVisibility(true);
+
+	
 }
 void Application::Update(void)
 {
@@ -57,6 +61,7 @@ void Application::Update(void)
 	matrix4 mSteve = glm::translate(vector3(2.5f, 0.0f, 0.0f)) * glm::rotate(IDENTITY_M4, glm::radians(-55.0f), AXIS_Z);
 	m_pEntityMngr->SetModelMatrix(mSteve, "Steve");
 
+	m_pEntityMngr->AddEntityToRenderList("Object", false);
 
 	//Move the last entity added slowly to the right
 	matrix4 lastMatrix = m_pEntityMngr->GetModelMatrix();// get the model matrix of the last added
