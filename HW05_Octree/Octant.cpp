@@ -23,20 +23,47 @@ Octant::Octant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 	//to subdivide the octant based on how many objects are in it already an how many you IDEALLY
 	//want in it, remember each subdivision will create 8 children for this octant but not all children
 	//of those children will have children of their own
-
-	//The following is a made-up size, you need to make sure it is measuring all the object boxes in the world
 	std::vector<vector3> lMinMax;
-	lMinMax.push_back(vector3(-50.0f));
-	lMinMax.push_back(vector3(25.0f));
+	Entity* e = m_pEntityMngr->GetEntity(0);
+	m_EntityList.push_back(0);
+	RigidBody* m = e->GetRigidBody();
+	vector3 center = m->GetCenterGlobal();
+	float minX = center.x;
+	float maxX = center.x;
+	float minY = center.y;
+	float maxY = center.y;
+	float minZ = center.z;
+	float maxZ = center.z;
+	for (int i = 1; i < m_pEntityMngr->GetEntityCount(); i++)
+	{
+		Entity* e = m_pEntityMngr->GetEntity(i);
+		RigidBody* m = e->GetRigidBody();
+		vector3 c = m->GetCenterGlobal();
+		
+		if (c.x > maxX) maxX = c.x;
+		if (c.x < minX) minX = c.x;
+		if (c.y > maxY) maxY = c.y;
+		if (c.y < minY) minY = c.y;
+		if (c.z > maxZ) maxZ = c.z;
+		if (c.z < minZ) minZ = c.z;
+
+		m_EntityList.push_back(i);
+
+	}
+	vector3 Min = vector3(minX, minY, minZ);
+	vector3 Max = vector3(maxX, maxY, maxZ);
+
+	lMinMax.push_back(Min);
+	lMinMax.push_back(Max);
 	RigidBody pRigidBody = RigidBody(lMinMax);
 
 
-	//The following will set up the values of the octant, make sure the are right, the rigid body at start
-	//is NOT fine, it has made-up values
+	//The following will set up the values of the octant, make sure the are right
 	m_fSize = pRigidBody.GetHalfWidth().x * 2.0f;
 	m_v3Center = pRigidBody.GetCenterLocal();
 	m_v3Min = m_v3Center - pRigidBody.GetHalfWidth();
 	m_v3Max = m_v3Center + pRigidBody.GetHalfWidth();
+	
 
 	m_uOctantCount++; //When we add an octant we increment the count
 	ConstructTree(m_uMaxLevel); //Construct the children
@@ -72,18 +99,176 @@ void Octant::Subdivide(void)
 		return;
 
 	//Subdivide the space and allocate 8 children
+
+	//front top right 
+	float ftrx = m_v3Center.x + m_fSize / 4;
+	float ftry = m_v3Center.y + m_fSize / 4;
+	float ftrz = m_v3Center.z + m_fSize / 4;
+	vector3 ftrc = vector3(ftrx, ftry, ftrz);
+	float ftrSize = m_fSize / 2;
+	Octant frontTopRight = Octant(ftrc, ftrSize);
+	frontTopRight.m_uLevel = this->m_uLevel + 1;
+	frontTopRight.m_pParent = this;
+	this->m_uChildren++;
+	if (frontTopRight.ContainsAtLeast(m_uIdealEntityCount))
+	{
+		frontTopRight.Subdivide();
+	}
+
+	//front top left
+	float ftlx = m_v3Center.x - m_fSize / 4;
+	float ftly = m_v3Center.y + m_fSize / 4;
+	float ftlz = m_v3Center.z + m_fSize / 4;
+	vector3 ftlc = vector3(ftlx, ftly, ftlz);
+	float ftlSize = m_fSize / 2;
+	Octant frontTopLeft = Octant(ftlc, ftlSize);
+	frontTopLeft.m_uLevel = this->m_uLevel + 1;
+	frontTopLeft.m_pParent = this;
+	this->m_uChildren++;
+	if (frontTopLeft.ContainsAtLeast(m_uIdealEntityCount))
+	{
+		frontTopLeft.Subdivide();
+	}
+
+
+	//front bottom right
+	float fbrx = m_v3Center.x + m_fSize / 4;
+	float fbry = m_v3Center.y - m_fSize / 4;
+	float fbrz = m_v3Center.z + m_fSize / 4;
+	vector3 fbrc = vector3(fbrx, fbry, fbrz);
+	float fbrSize = m_fSize / 2;
+	Octant frontBottomRight = Octant(fbrc, fbrSize);
+	frontBottomRight.m_uLevel = this->m_uLevel + 1;
+	frontBottomRight.m_pParent = this;
+	this->m_uChildren++;
+	if (frontBottomRight.ContainsAtLeast(m_uIdealEntityCount))
+	{
+		frontBottomRight.Subdivide();
+	}
+
+	//front bottom left
+	float fblx = m_v3Center.x - m_fSize / 4;
+	float fbly = m_v3Center.y - m_fSize / 4;
+	float fblz = m_v3Center.z + m_fSize / 4;
+	vector3 fblc = vector3(fblx, fbly, fblz);
+	float fblSize = m_fSize / 2;
+	Octant frontBottomLeft = Octant(fblc, fblSize);
+	frontBottomLeft.m_uLevel = this->m_uLevel + 1;
+	frontBottomLeft.m_pParent = this;
+	this->m_uChildren++;
+	if (frontBottomLeft.ContainsAtLeast(m_uIdealEntityCount))
+	{
+		frontBottomLeft.Subdivide();
+	}
+
+	//back top right 
+	float btrx = m_v3Center.x + m_fSize / 4;
+	float btry = m_v3Center.y + m_fSize / 4;
+	float btrz = m_v3Center.z - m_fSize / 4;
+	vector3 btrc = vector3(btrx, btry, btrz);
+	float btrSize = m_fSize / 2;
+	Octant backTopRight = Octant(btrc, btrSize);
+	backTopRight.m_uLevel = this->m_uLevel + 1;
+	backTopRight.m_pParent = this;
+	this->m_uChildren++;
+	if (backTopRight.ContainsAtLeast(m_uIdealEntityCount))
+	{
+		backTopRight.Subdivide();
+	}
+
+	//back top left
+	float btlx = m_v3Center.x - m_fSize / 4;
+	float btly = m_v3Center.y + m_fSize / 4;
+	float btlz = m_v3Center.z - m_fSize / 4;
+	vector3 btlc = vector3(btlx, btly, btlz);
+	float btlSize = m_fSize / 2;
+	Octant backTopLeft = Octant(btlc, btlSize);
+	backTopLeft.m_uLevel = this->m_uLevel + 1;
+	backTopLeft.m_pParent = this;
+	this->m_uChildren++;
+	if (backTopLeft.ContainsAtLeast(m_uIdealEntityCount))
+	{
+		backTopLeft.Subdivide();
+	}
+
+
+	//back bottom right
+	float bbrx = m_v3Center.x + m_fSize / 4;
+	float bbry = m_v3Center.y - m_fSize / 4;
+	float bbrz = m_v3Center.z - m_fSize / 4;
+	vector3 bbrc = vector3(bbrx, bbry, bbrz);
+	float bbrSize = m_fSize / 2;
+	Octant backBottomRight = Octant(bbrc, bbrSize);
+	backBottomRight.m_uLevel = this->m_uLevel + 1;
+	backBottomRight.m_pParent = this;
+	this->m_uChildren++;
+	if (backBottomRight.ContainsAtLeast(m_uIdealEntityCount))
+	{
+		backBottomRight.Subdivide();
+	}
+
+	//back bottom left
+	float bblx = m_v3Center.x - m_fSize / 4;
+	float bbly = m_v3Center.y - m_fSize / 4;
+	float bblz = m_v3Center.z - m_fSize / 4;
+	vector3 bblc = vector3(bblx, bbly, bblz);
+	float bblSize = m_fSize / 2;
+	Octant backBottomLeft = Octant(bblc, bblSize);
+	backBottomLeft.m_uLevel = this->m_uLevel + 1;
+	backBottomLeft.m_pParent = this;
+	this->m_uChildren++;
+	if (backBottomLeft.ContainsAtLeast(m_uIdealEntityCount))
+	{
+		backBottomLeft.Subdivide();
+	}
+
 }
 bool Octant::ContainsAtLeast(uint a_nEntities)
 {
-	//You need to check how many entity objects live within this octant
-	return false; //return something for the sake of start up code
+	uint size = m_EntityList.size();
+	if (size >= a_nEntities)
+	{
+		return true;
+	}
+	return false;
 }
 void Octant::AssignIDtoEntity(void)
 {
 	//Recursive method
 	//Have to traverse the tree and make sure to tell the entity manager
 	//what octant (space) each object is at
-	m_pEntityMngr->AddDimension(0, m_uID);//example only, take the first entity and tell it its on this space
+	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+	{
+		Entity* e = m_pEntityMngr->GetEntity(i);
+		RigidBody* m = e->GetRigidBody();
+		vector3 c = m->GetCenterGlobal();
+		vector3 min = m->GetMinGlobal();
+		vector3 max = m->GetMaxGlobal();
+		bool bColliding = true;
+		if (this->m_v3Max.x < max.x) //this to the right of other
+			bColliding = false;
+		if (this->m_v3Min.x > max.x) //this to the left of other
+			bColliding = false;
+
+		if (this->m_v3Max.y < min.y) //this below of other
+			bColliding = false;
+		if (this->m_v3Min.y > max.y) //this above of other
+			bColliding = false;
+
+		if (this->m_v3Max.z < min.z) //this behind of other
+			bColliding = false;
+		if (this->m_v3Min.z > max.z) //this in front of other
+			bColliding = false;
+
+		if (bColliding)
+		{
+			m_EntityList.push_back(i);
+			m_pEntityMngr->AddDimension(i, m_uID);//example only, take the entity and tell it its on this space
+
+		}
+
+	}
+	
 }
 //-------------------------------------------------------------------------------------------------------------------
 // You can assume the following is fine and does not need changes, you may add onto it but the code is fine as is
