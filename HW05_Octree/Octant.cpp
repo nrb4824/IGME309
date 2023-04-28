@@ -104,8 +104,33 @@ bool Octant::IsColliding(uint a_uRBIndex)
 }
 void Octant::Display(uint a_nIndex, vector3 a_v3Color)
 {
+	Octant* node = this;
+	bool found = false;
 	// Display the specified octant
-	
+	if (m_pRoot->m_uID == a_nIndex)
+	{
+		m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_pRoot->m_v3Center) *
+			glm::scale(vector3(m_pRoot->m_fSize)), a_v3Color);
+	}
+	else
+	{
+		while (!found)
+		{
+			for (int i = 0; i < node->m_uChildren; i++)
+			{
+				if (node->m_pChild[i]->m_uID == a_nIndex)
+				{
+					node = node->m_pChild[i];
+					m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, node->m_v3Center) *
+						glm::scale(vector3(node->m_fSize)), a_v3Color);
+					found = true;
+				}
+			}
+			
+		}
+		node->Display(a_nIndex, a_v3Color);
+	}
+
 	m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
 		glm::scale(vector3(m_fSize)), a_v3Color);
 }
