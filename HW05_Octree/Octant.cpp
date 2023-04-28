@@ -77,54 +77,53 @@ bool Octant::IsColliding(uint a_uRBIndex)
 	//As the Octree will never rotate or scale this collision is as easy as an Axis Alligned Bounding Box
 	//Get all vectors in global space (the octant ones are already in Global)
 
-	//checks if entitiy in octant.
-	RigidBody* t = m_pEntityMngr->GetEntity(a_uRBIndex)->GetRigidBody();
+	Entity* e = m_pEntityMngr->GetEntity(a_uRBIndex);
+	RigidBody* m = e->GetRigidBody();
+	vector3 c = m->GetCenterGlobal();
+	vector3 min = m->GetMinGlobal();
+	vector3 max = m->GetMaxGlobal();
 	bool bColliding = true;
-	for (int i = 0; i < this->m_EntityList.size(); i++)
-	{
-		uint other = this->m_EntityList[i];
+	if (this->m_v3Max.x < max.x) //this to the right of other
+		bColliding = false;
+	if (this->m_v3Min.x > max.x) //this to the left of other
+		bColliding = false;
 
-		RigidBody* p = m_pEntityMngr->GetEntity(other)->GetRigidBody();
-		
-		if (t->GetMaxGlobal().x < p->GetMinGlobal().x) //this to the right of other
-			bColliding = false;
-		if (t->GetMinGlobal().x > p->GetMaxGlobal().x) //this to the left of other
-			bColliding = false;
+	if (this->m_v3Max.y < min.y) //this below of other
+		bColliding = false;
+	if (this->m_v3Min.y > max.y) //this above of other
+		bColliding = false;
 
-		if (t->GetMaxGlobal().y < p->GetMinGlobal().y) //this to the right of other
-			bColliding = false;
-		if (t->GetMinGlobal().y > p->GetMaxGlobal().y) //this to the left of other
-			bColliding = false;
-
-		if (t->GetMaxGlobal().z < p->GetMinGlobal().z) //this to the right of other
-			bColliding = false;
-		if (t->GetMinGlobal().z > p->GetMaxGlobal().z) //this to the left of other
-			bColliding = false;
-		if (bColliding)
-		{
-			return bColliding;
-		}
-	}
+	if (this->m_v3Max.z < min.z) //this behind of other
+		bColliding = false;
+	if (this->m_v3Min.z > max.z) //this in front of other
+		bColliding = false;
 
 	return bColliding;
 }
 void Octant::Display(uint a_nIndex, vector3 a_v3Color)
 {
 	// Display the specified octant
+	
+	m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
+		glm::scale(vector3(m_fSize)), a_v3Color);
 }
 void Octant::Display(vector3 a_v3Color)
 {
 	//this is meant to be a recursive method, in starter code will only display the root
 	//even if other objects are created
-	m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
-		glm::scale(vector3(m_fSize)), a_v3Color);
-	if (this->m_uChildren != 0)
+
+	uint nLeafs = this->m_uChildren; //get how many children this will have (either 0 or 8)
+	if (m_uChildren != 0)
 	{
-		for (int i = 0; i < m_uChildren; i++)
+		for (uint nChild = 0; nChild < nLeafs; nChild++)
 		{
-			this->m_pChild[i]->DisplayLeaves(a_v3Color);
+			m_pChild[nChild]->Display(a_v3Color);
 		}
 	}
+	
+	//Draw the cube
+	m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
+		glm::scale(vector3(m_fSize)), a_v3Color);
 	
 }
 void Octant::Subdivide(void)
@@ -139,9 +138,6 @@ void Octant::Subdivide(void)
 
 	//Subdivide the space and allocate 8 children
 
-
-	//-----------------------------------------------------------------------
-	// change the rest of the children to match this one.
 	//front top right 
 	float ftrx = m_v3Center.x + m_fSize / 4;
 	float ftry = m_v3Center.y + m_fSize / 4;
@@ -162,12 +158,12 @@ void Octant::Subdivide(void)
 	float ftlz = m_v3Center.z + m_fSize / 4;
 	vector3 ftlc = vector3(ftlx, ftly, ftlz);
 	float ftlSize = m_fSize / 2;
-	Octant frontTopLeft = Octant(ftlc, ftlSize);
-	frontTopLeft.m_uLevel = this->m_uLevel + 1;
-	this->m_pChild[1] = &frontTopLeft;
-	if (frontTopLeft.ContainsAtLeast(m_uIdealEntityCount))
+	Octant* frontTopLeft = new Octant(ftlc, ftlSize);
+	frontTopLeft->m_uLevel = this->m_uLevel + 1;
+	this->m_pChild[1] = frontTopLeft;
+	if (frontTopLeft->ContainsAtLeast(m_uIdealEntityCount))
 	{
-		frontTopLeft.Subdivide();
+		frontTopLeft->Subdivide();
 	}
 
 
@@ -177,12 +173,12 @@ void Octant::Subdivide(void)
 	float fbrz = m_v3Center.z + m_fSize / 4;
 	vector3 fbrc = vector3(fbrx, fbry, fbrz);
 	float fbrSize = m_fSize / 2;
-	Octant frontBottomRight = Octant(fbrc, fbrSize);
-	frontBottomRight.m_uLevel = this->m_uLevel + 1;
-	this->m_pChild[2] = &frontBottomRight;
-	if (frontBottomRight.ContainsAtLeast(m_uIdealEntityCount))
+	Octant* frontBottomRight = new Octant(fbrc, fbrSize);
+	frontBottomRight->m_uLevel = this->m_uLevel + 1;
+	this->m_pChild[2] = frontBottomRight;
+	if (frontBottomRight->ContainsAtLeast(m_uIdealEntityCount))
 	{
-		frontBottomRight.Subdivide();
+		frontBottomRight->Subdivide();
 	}
 
 	//front bottom left
@@ -191,12 +187,12 @@ void Octant::Subdivide(void)
 	float fblz = m_v3Center.z + m_fSize / 4;
 	vector3 fblc = vector3(fblx, fbly, fblz);
 	float fblSize = m_fSize / 2;
-	Octant frontBottomLeft = Octant(fblc, fblSize);
-	frontBottomLeft.m_uLevel = this->m_uLevel + 1;
-	this->m_pChild[3] = &frontBottomLeft;
-	if (frontBottomLeft.ContainsAtLeast(m_uIdealEntityCount))
+	Octant* frontBottomLeft = new Octant(fblc, fblSize);
+	frontBottomLeft->m_uLevel = this->m_uLevel + 1;
+	this->m_pChild[3] = frontBottomLeft;
+	if (frontBottomLeft->ContainsAtLeast(m_uIdealEntityCount))
 	{
-		frontBottomLeft.Subdivide();
+		frontBottomLeft->Subdivide();
 	}
 
 	//back top right 
@@ -205,12 +201,12 @@ void Octant::Subdivide(void)
 	float btrz = m_v3Center.z - m_fSize / 4;
 	vector3 btrc = vector3(btrx, btry, btrz);
 	float btrSize = m_fSize / 2;
-	Octant backTopRight = Octant(btrc, btrSize);
-	backTopRight.m_uLevel = this->m_uLevel + 1;
-	this->m_pChild[4] = &backTopRight;
-	if (backTopRight.ContainsAtLeast(m_uIdealEntityCount))
+	Octant* backTopRight = new Octant(btrc, btrSize);
+	backTopRight->m_uLevel = this->m_uLevel + 1;
+	this->m_pChild[4] = backTopRight;
+	if (backTopRight->ContainsAtLeast(m_uIdealEntityCount))
 	{
-		backTopRight.Subdivide();
+		backTopRight->Subdivide();
 	}
 
 	//back top left
@@ -219,12 +215,12 @@ void Octant::Subdivide(void)
 	float btlz = m_v3Center.z - m_fSize / 4;
 	vector3 btlc = vector3(btlx, btly, btlz);
 	float btlSize = m_fSize / 2;
-	Octant backTopLeft = Octant(btlc, btlSize);
-	backTopLeft.m_uLevel = this->m_uLevel + 1;
-	this->m_pChild[5] = &backTopLeft;
-	if (backTopLeft.ContainsAtLeast(m_uIdealEntityCount))
+	Octant* backTopLeft = new Octant(btlc, btlSize);
+	backTopLeft->m_uLevel = this->m_uLevel + 1;
+	this->m_pChild[5] = backTopLeft;
+	if (backTopLeft->ContainsAtLeast(m_uIdealEntityCount))
 	{
-		backTopLeft.Subdivide();
+		backTopLeft->Subdivide();
 	}
 
 
@@ -234,12 +230,12 @@ void Octant::Subdivide(void)
 	float bbrz = m_v3Center.z - m_fSize / 4;
 	vector3 bbrc = vector3(bbrx, bbry, bbrz);
 	float bbrSize = m_fSize / 2;
-	Octant backBottomRight = Octant(bbrc, bbrSize);
-	backBottomRight.m_uLevel = this->m_uLevel + 1;
-	this->m_pChild[6] = &backBottomRight;
-	if (backBottomRight.ContainsAtLeast(m_uIdealEntityCount))
+	Octant* backBottomRight = new Octant(bbrc, bbrSize);
+	backBottomRight->m_uLevel = this->m_uLevel + 1;
+	this->m_pChild[6] = backBottomRight;
+	if (backBottomRight->ContainsAtLeast(m_uIdealEntityCount))
 	{
-		backBottomRight.Subdivide();
+		backBottomRight->Subdivide();
 	}
 
 	//back bottom left
@@ -248,12 +244,12 @@ void Octant::Subdivide(void)
 	float bblz = m_v3Center.z - m_fSize / 4;
 	vector3 bblc = vector3(bblx, bbly, bblz);
 	float bblSize = m_fSize / 2;
-	Octant backBottomLeft = Octant(bblc, bblSize);
-	backBottomLeft.m_uLevel = this->m_uLevel + 1;
-	this->m_pChild[7] = &backBottomLeft;
-	if (backBottomLeft.ContainsAtLeast(m_uIdealEntityCount))
+	Octant* backBottomLeft = new Octant(bblc, bblSize);
+	backBottomLeft->m_uLevel = this->m_uLevel + 1;
+	this->m_pChild[7] = backBottomLeft;
+	if (backBottomLeft->ContainsAtLeast(m_uIdealEntityCount))
 	{
-		backBottomLeft.Subdivide();
+		backBottomLeft->Subdivide();
 	}
 
 	this->m_uChildren = 8;
@@ -264,15 +260,17 @@ bool Octant::ContainsAtLeast(uint a_nEntities)
 
 	//use is colliding to see if at least a_nEntities are in this octant.
 	this->AssignIDtoEntity();
-	for (int i = 0; i < this->m_EntityList.size(); i++)
+	uint count = 0;
+	for (int i = 0; i < this->m_pEntityMngr->GetEntityCount(); i++)
 	{
-		this->IsColliding(i);
-	}
-	
-	uint size = m_EntityList.size();
-	if (size >= a_nEntities)
-	{
-		return true;
+		if (m_pEntityMngr->GetEntity(i)->IsInDimension(this->m_uID))
+		{
+			count++;
+			if (count >= a_nEntities)
+			{
+				return true;
+			}
+		}
 	}
 	return false;
 }
@@ -282,33 +280,14 @@ void Octant::AssignIDtoEntity(void)
 	//Have to traverse the tree and make sure to tell the entity manager
 	//what octant (space) each object is at
 
-	//move this octant check to is colliding
+	
+	bool bColliding;
 	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
 	{
-		Entity* e = m_pEntityMngr->GetEntity(i);
-		RigidBody* m = e->GetRigidBody();
-		vector3 c = m->GetCenterGlobal();
-		vector3 min = m->GetMinGlobal();
-		vector3 max = m->GetMaxGlobal();
-		bool bColliding = true;
-		if (this->m_v3Max.x < max.x) //this to the right of other
-			bColliding = false;
-		if (this->m_v3Min.x > max.x) //this to the left of other
-			bColliding = false;
-
-		if (this->m_v3Max.y < min.y) //this below of other
-			bColliding = false;
-		if (this->m_v3Min.y > max.y) //this above of other
-			bColliding = false;
-
-		if (this->m_v3Max.z < min.z) //this behind of other
-			bColliding = false;
-		if (this->m_v3Min.z > max.z) //this in front of other
-			bColliding = false;
+		bColliding = this->IsColliding(i);
 
 		if (bColliding)
 		{
-			m_EntityList.push_back(i); //remove
 			m_pEntityMngr->AddDimension(i, m_uID);//example only, take the entity and tell it its on this space
 
 		}
