@@ -77,6 +77,8 @@ bool Octant::IsColliding(uint a_uRBIndex)
 	//As the Octree will never rotate or scale this collision is as easy as an Axis Alligned Bounding Box
 	//Get all vectors in global space (the octant ones are already in Global)
 
+	//Checks to see if the given entity is in the current octant
+
 	Entity* e = m_pEntityMngr->GetEntity(a_uRBIndex);
 	RigidBody* m = e->GetRigidBody();
 	vector3 c = m->GetCenterGlobal();
@@ -112,6 +114,7 @@ void Octant::Display(vector3 a_v3Color)
 	//this is meant to be a recursive method, in starter code will only display the root
 	//even if other objects are created
 
+	//recursively displays the octants depending on level.
 	uint nLeafs = this->m_uChildren; //get how many children this will have (either 0 or 8)
 	if (m_uChildren != 0)
 	{
@@ -137,6 +140,7 @@ void Octant::Subdivide(void)
 		return;
 
 	//Subdivide the space and allocate 8 children
+	//Creates 8 new octants and recursively calls subdivide on each.
 
 	//front top right 
 	float ftrx = m_v3Center.x + m_fSize / 4;
@@ -280,7 +284,7 @@ void Octant::AssignIDtoEntity(void)
 	//Have to traverse the tree and make sure to tell the entity manager
 	//what octant (space) each object is at
 
-	
+	//for each entity assign which octant it is in
 	bool bColliding;
 	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
 	{
