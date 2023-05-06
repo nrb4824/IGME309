@@ -85,7 +85,7 @@ bool Octant::IsColliding(uint a_uRBIndex)
 	vector3 min = m->GetMinGlobal();
 	vector3 max = m->GetMaxGlobal();
 	bool bColliding = true;
-	if (this->m_v3Max.x < max.x) //this to the right of other
+	if (this->m_v3Max.x < min.x) //this to the right of other
 		bColliding = false;
 	if (this->m_v3Min.x > max.x) //this to the left of other
 		bColliding = false;
@@ -288,11 +288,11 @@ bool Octant::ContainsAtLeast(uint a_nEntities)
 {
 
 	//use is colliding to see if at least a_nEntities are in this octant.
-	this->AssignIDtoEntity();
+	//this->AssignIDtoEntity();
 	uint count = 0;
 	for (int i = 0; i < this->m_pEntityMngr->GetEntityCount(); i++)
 	{
-		if (m_pEntityMngr->GetEntity(i)->IsInDimension(this->m_uID))
+		if (IsColliding(i))
 		{
 			count++;
 			if (count >= a_nEntities)
@@ -309,19 +309,35 @@ void Octant::AssignIDtoEntity(void)
 	//Have to traverse the tree and make sure to tell the entity manager
 	//what octant (space) each object is at
 
-	//for each entity assign which octant it is in
-	bool bColliding;
-	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+	for (uint nIndex = 0; nIndex < m_uChildren; nIndex++)
 	{
-		bColliding = this->IsColliding(i);
-
-		if (bColliding)
-		{
-			m_pEntityMngr->AddDimension(i, m_uID);//example only, take the entity and tell it its on this space
-
-		}
-
+		m_pChild[nIndex]->AssignIDtoEntity();
 	}
+
+	if (m_uChildren == 0)
+	{
+		for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+		{
+			if (IsColliding(i))
+			{
+				m_pEntityMngr->AddDimension(i, m_uID);
+			}
+		}
+	}
+
+	////for each entity assign which octant it is in
+	//bool bColliding;
+	//for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++)
+	//{
+	//	bColliding = this->IsColliding(i);
+
+	//	if (bColliding)
+	//	{
+	//		m_pEntityMngr->AddDimension(i, m_uID);//example only, take the entity and tell it its on this space
+
+	//	}
+
+	//}
 	
 }
 //-------------------------------------------------------------------------------------------------------------------
